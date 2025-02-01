@@ -2,7 +2,8 @@
 
 global Layer := 1     
 global Window := 0    
-global FadeTimer  
+global FadeTimer := 0  
+global ActiveFade := false
 
 ; Layer increment
 ^+F24:: 
@@ -12,10 +13,10 @@ global FadeTimer
     CreateWindow(Layer)
 }
 
-CreateWindow(val) {
-    global Window
-    if !IsObject(Window)  
-    {
+CreateWindow(val) 
+{
+    global Window, FadeTimer, ActiveFade
+    if !IsObject(Window)  {
         Window := Gui()
         Window.Name := "Layer"
         Window.Opt("+AlwaysOnTop -Caption +ToolWindow +E0x20")  ; Opaque, no title bar
@@ -26,28 +27,43 @@ CreateWindow(val) {
         Window.Add("Text", "xm-10 ym+15 w100 h50 Center vDisplayText")  
     }
 
-    Window["DisplayText"].Value := val  
     Window.Show("x10 y10 w100 h100")  
+    Window["DisplayText"].Value := val  
+    WinSetTransparent(255, Window)
+    ActiveFade := false
 
-    Window.Opt("+LastFound")  
-    WinSetTransparent(255)
-
-    global FadeTimer
-    FadeTimer := SetTimer(FadeWindow, -1000)  ; Start the fade
+    if (FadeTimer) {
+        SetTimer(FadeTimer, 0)
+        FadeTimer := 0
+    } 
+    else 
+        FadeTimer := SetTimer(() => StartFade(), -1000)
 }
 
-FadeWindow()
+StartFade()
 {
-    Opacity := 255
-    while Opacity >= 0  
-    {
-        global Window
-        WinSetTransparent(Opacity, Window)  
-        Sleep(50)  
-        Opacity -= 15  
+    global Window, ActiveFade
+    ActiveFade := true
+    Window.opacity := 255
+    SetTimer(() => FadeStep(), 50)
+}
+
+FadeStep() 
+{
+    global Window, ActiveFade
+    if (!ActiveFade) {
+        SetTimer(, 0)
+        return
     }
-    global Window
-    Window.Hide()  
+    
+    Window.opacity := Max(0, Window.opacity - 15)
+    try WinSetTransparent(Window.opacity, Window)
+    
+    if (Window.opacity <= 0) {
+        ActiveFade := false
+        Window.Hide()
+        SetTimer(, 0)     ; Delete timer at this point
+    }
 }
 
 F13:: 
@@ -82,7 +98,8 @@ F19:: Send("{Ctrl Down}{v}{Ctrl Up}")
 !^=:: AdjustVolume(5)
 !^-:: AdjustVolume(-5)
 
-AdjustVolume(step) {
+AdjustVolume(step) 
+{
     focusedWindowPID := WinGetPID("A")
     focusedProcessName := ProcessGetName(focusedWindowPID)
 
