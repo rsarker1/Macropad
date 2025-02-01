@@ -4,6 +4,13 @@ This is just an AutoHotKey script for my Megalodon Triple Knob Macropad. It allo
 
 This is primarily for my own personal use, but I wanted to upload it in case anyone else could expand on it and improve its functionality, regardless of how niche it may be. 
 
+## List of required programs
+
+* [SoundVolumeView](https://www.nirsoft.net/utils/sound_volume_view.html) to control per application sound settings.
+* [AutoControl](https://www.autocontrol.app/), which is a Chrome extension that allows for keyboard shortcuts and gestures to trigger actions in the browser.
+  * I am unsure of an equivalent for Firefox.
+  * The shortcuts that use this extension will also have information on how the action associated with it was configured for AutoControl.
+
 ## Note
 
 Currently, the implementation of a layer system for the Megalodon macropad is somewhat flawed, at least for my use case. In the [VIA](https://usevia.app/) online editor, there is a layer switch "signal" (if that's the right term for it) that can be assigned to any button, but it seems to only work on the actual device, as there is no keycode that is associated with that action. 

@@ -1,6 +1,7 @@
-﻿; Current layer being used on macropad
-global Layer := 1 
-global Window := 0  
+﻿#SingleInstance Force
+
+global Layer := 1     
+global Window := 0    
 global FadeTimer  
 
 ; Layer increment
@@ -8,13 +9,9 @@ global FadeTimer
 {
     global Layer 
     if (Layer == 4) 
-    {
         Layer := 1
-    }
     else
-    {
         Layer++
-    }
     CreateWindow(Layer)
 }
 
@@ -87,3 +84,15 @@ F18:: Send("{Ctrl Down}{c}{Ctrl Up}")
 
 ; Paste 
 F19:: Send("{Ctrl Down}{v}{Ctrl Up}")
+
+; Adjust focused application sound. Requires SoundVolumeView 
+!^=:: AdjustVolume(5)
+!^-:: AdjustVolume(-5)
+
+AdjustVolume(step) {
+    focusedWindowPID := WinGetPID("A")
+    focusedProcessName := ProcessGetName(focusedWindowPID)
+
+    focusedAppVolumeCommand := "D:\Programs\SoundVolumeView\SoundVolumeView.exe /ChangeVolume " focusedProcessName " " step
+    Run(focusedAppVolumeCommand)
+}
