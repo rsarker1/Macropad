@@ -100,9 +100,11 @@ F19:: Send("{Ctrl Down}{v}{Ctrl Up}")
 
 AdjustVolume(step) 
 {
+    ; Change path to wherever you placed the SoundVolumeView program 
+    programPath := "D:\Programs\SoundVolumeView\SoundVolumeView.exe"
+
     focusedWindowPID := WinGetPID("A")
     focusedProcessName := ProcessGetName(focusedWindowPID)
-
-    focusedAppVolumeCommand := "D:\Programs\SoundVolumeView\SoundVolumeView.exe /ChangeVolume " focusedProcessName " " step
-    Run(focusedAppVolumeCommand)
+    focusedAppVol := programPath " /ChangeVolume " focusedProcessName " " step
+    Run(focusedAppVol)
 }
