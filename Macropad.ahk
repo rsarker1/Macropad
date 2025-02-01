@@ -8,10 +8,7 @@ global FadeTimer
 ^+F24:: 
 {
     global Layer 
-    if (Layer == 4) 
-        Layer := 1
-    else
-        Layer++
+    Layer := Mod(Layer, 4) + 1
     CreateWindow(Layer)
 }
 
@@ -53,8 +50,6 @@ FadeWindow()
     Window.Hide()  
 }
 
-
-Numpad1:: Send("{Alt Down}{Ctrl Down}{F11}{Ctrl Up}{Alt Up}")
 F13:: 
 {
     global Layer
@@ -69,11 +64,9 @@ F13::
 }    
 
 ; Normal terminal
-Numpad4:: Run("wt.exe")
 F14:: Run("wt.exe")
 
 ; Server access
-Numpad5:: Run('wt.exe --profile "Server SSH"')
 F15:: Run('wt.exe --profile "Server SSH"')
 
 ; Cut 

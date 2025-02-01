@@ -6,6 +6,7 @@ This is primarily for my own personal use, but I wanted to upload it in case any
 
 ## List of required programs
 
+* [SoundSwitch](https://soundswitch.aaflalo.me/) to handle switching between audio devices.   
 * [SoundVolumeView](https://www.nirsoft.net/utils/sound_volume_view.html) to control per application sound settings.
 * [AutoControl](https://www.autocontrol.app/), which is a Chrome extension that allows for keyboard shortcuts and gestures to trigger actions in the browser.
   * I am unsure of an equivalent for Firefox.
