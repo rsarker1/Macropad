@@ -135,9 +135,11 @@ elif pad_present; then
     # The bootloader may only wait briefly after a reset, so when dfu-util
     # supports --wait, start it first and let it catch the device the moment
     # it appears. Otherwise poll for the bootloader, then flash.
+    # Use -w, not --wait: dfu-util 0.11's long --wait wrongly takes a value,
+    # so it swallows the -d after it ("Unexpected argument: 1EAF:0003").
     DFU_PID=""
     if "$DFU" --help 2>&1 | grep -q -- '--wait'; then
-        timeout $((BOOT_WAIT + 60)) "$DFU" --wait "${DFU_ARGS[@]}" >"$DFU_LOG" 2>&1 &
+        timeout $((BOOT_WAIT + 60)) "$DFU" -w "${DFU_ARGS[@]}" >"$DFU_LOG" 2>&1 &
         DFU_PID=$!
         sleep 1
     fi
