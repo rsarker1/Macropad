@@ -26,7 +26,7 @@ The pad tells the script which layer it's on with an **announce combo**: every t
 
 This folder is a QMK **userspace**: QMK builds straight from it, so nothing is copied into the QMK install.
 
-- `keyboards/doio/kb16/keymaps/enhanced/`: the firmware (`keymap.c`, `config.h`, `rules.mk`). The folder name `enhanced` is the keymap name. It's the `-km` argument and the end of the `.bin` filename.
+- `keyboards/doio/kb16/keymaps/enhanced/`: the firmware (`keymap.c`, `config.h`, `rules.mk`, and the LED driver `ws2812_custom.c`). The folder name `enhanced` is the keymap name. It's the `-km` argument and the end of the `.bin` filename.
 - `qmk.json`: marks this folder as a userspace and lists the build target.
 - `doio_kb16_rev2_enhanced.bin`: the latest build. QMK writes it here, and it's committed alongside the source that produced it.
 - `ahk/Macropad.ahk`: the AutoHotkey script.
@@ -70,6 +70,7 @@ What each layer does is in `keymap.c` and summarized in `README.md`. This sectio
   - **The layer knob** is `LYR_NEXT` = `QK_USER_0` = `0x7E40`, which VIA shows only as that number. A key press eaten by a layer jump also has its release eaten (the `swallowed` bitmask), or the F-key's release would leak to the PC.
 - **Announce combo:** `layer_state_set_user` only sets a flag. `housekeeping_task_user` sends the combo, because sending keys from inside a layer change can fire in the middle of a key press. It also announces once, 1 s after boot.
 - **Lighting (`layer_lights[]`):**
+  - **LED driver:** `ws2812_custom.c` (`WS2812_DRIVER = custom`) sends the LED data with exact, branch-free pulse widths. QMK's stock bitbang driver held a "0" bit high for ~400–500 ns on this board, which the LEDs misread as a "1", so dim colors and fades showed random colors. The hardware PWM driver can't be used: TIM1 (the only timer on pin A10) has its DMA request on DMA1 channel 5, which the OLED's I2C2 driver allocates. After editing the driver, check the pulse widths in the disassembly (`~/.local/share/qmk/bin/arm-none-eabi-objdump -d` on the `.elf`, function `send_byte`): the pin writes must be separated only by NOPs.
   - **Brightness is left alone** so VIA's slider still works; color and effect are overwritten on each layer change.
   - **Choosing effects:** only use effects that keep one color, so the color always identifies the layer. The rainbow, cycle, beacon, raindrop and pixel effects ignore the hue. `HUE_WAVE` and `HUE_PENDULUM` shift the hue too little to see on 16 LEDs, and Rahul rejected them. Effects that stay dark until a key is pressed hide which layer you're on.
   - **Confusable colors:** coral/amber and blue/violet are the pairs most easily confused, so give each pair contrasting effects.
