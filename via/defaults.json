@@ -1,0 +1,269 @@
+{
+ "build": "2026-11-23-01:00:49",
+ "shape": {
+  "layers": 8,
+  "rows": 4,
+  "cols": 5,
+  "encoders": 3,
+  "macro_size": 567
+ },
+ "layers": [
+  {
+   "keys": {
+    "key1": "0x0268",
+    "key2": "0x00AC",
+    "key3": "0x00AE",
+    "key4": "0x00AB",
+    "knob-left": "0x7E40",
+    "key5": "0x0068",
+    "key6": "0x0069",
+    "key7": "0x006A",
+    "key8": "0x00B2",
+    "knob-right": "0x0000",
+    "key9": "0x006C",
+    "key10": "0x006D",
+    "key11": "0x006E",
+    "key12": "0x004C",
+    "knob-big": "0x00A8",
+    "key13": "0x004A",
+    "key14": "0x004B",
+    "key15": "0x004E",
+    "key16": "0x004D",
+    "r3c4": "0x0000"
+   },
+   "turns": {
+    "enc0 ccw": "0x00BC",
+    "enc0 cw": "0x00BB",
+    "enc1 ccw": "0x0051",
+    "enc1 cw": "0x0052",
+    "enc2 ccw": "0x00AA",
+    "enc2 cw": "0x00A9"
+   }
+  },
+  {
+   "keys": {
+    "key1": "0x0268",
+    "key2": "0x0269",
+    "key3": "0x026A",
+    "key4": "0x026B",
+    "knob-left": "0x0001",
+    "key5": "0x0068",
+    "key6": "0x0069",
+    "key7": "0x006A",
+    "key8": "0x006B",
+    "knob-right": "0x0001",
+    "key9": "0x006C",
+    "key10": "0x006D",
+    "key11": "0x006E",
+    "key12": "0x006F",
+    "knob-big": "0x0001",
+    "key13": "0x0070",
+    "key14": "0x0071",
+    "key15": "0x0072",
+    "key16": "0x0073",
+    "r3c4": "0x0000"
+   },
+   "turns": {
+    "enc0 ccw": "0x0237",
+    "enc0 cw": "0x0236",
+    "enc1 ccw": "0x00DA",
+    "enc1 cw": "0x00D9",
+    "enc2 ccw": "0x052D",
+    "enc2 cw": "0x052E"
+   }
+  },
+  {
+   "keys": {
+    "key1": "0x0268",
+    "key2": "0x0269",
+    "key3": "0x026A",
+    "key4": "0x026B",
+    "knob-left": "0x0001",
+    "key5": "0x0068",
+    "key6": "0x0069",
+    "key7": "0x006A",
+    "key8": "0x006B",
+    "knob-right": "0x0001",
+    "key9": "0x006C",
+    "key10": "0x006D",
+    "key11": "0x006E",
+    "key12": "0x006F",
+    "knob-big": "0x0001",
+    "key13": "0x0070",
+    "key14": "0x0071",
+    "key15": "0x0072",
+    "key16": "0x0073",
+    "r3c4": "0x0000"
+   },
+   "turns": {
+    "enc0 ccw": "0x000D",
+    "enc0 cw": "0x000F",
+    "enc1 ccw": "0x00DA",
+    "enc1 cw": "0x00D9",
+    "enc2 ccw": "0x011D",
+    "enc2 cw": "0x031D"
+   }
+  },
+  {
+   "keys": {
+    "key1": "0x0268",
+    "key2": "0x0269",
+    "key3": "0x026A",
+    "key4": "0x026B",
+    "knob-left": "0x0001",
+    "key5": "0x0068",
+    "key6": "0x0069",
+    "key7": "0x006A",
+    "key8": "0x006B",
+    "knob-right": "0x0001",
+    "key9": "0x006C",
+    "key10": "0x006D",
+    "key11": "0x006E",
+    "key12": "0x006F",
+    "knob-big": "0x0001",
+    "key13": "0x0070",
+    "key14": "0x0071",
+    "key15": "0x0072",
+    "key16": "0x0073",
+    "r3c4": "0x0000"
+   },
+   "turns": {
+    "enc0 ccw": "0x002F",
+    "enc0 cw": "0x0030",
+    "enc1 ccw": "0x00DA",
+    "enc1 cw": "0x00D9",
+    "enc2 ccw": "0x012D",
+    "enc2 cw": "0x032E"
+   }
+  },
+  {
+   "keys": {
+    "key1": "0x0268",
+    "key2": "0x0269",
+    "key3": "0x026A",
+    "key4": "0x026B",
+    "knob-left": "0x0001",
+    "key5": "0x0068",
+    "key6": "0x0069",
+    "key7": "0x006A",
+    "key8": "0x006B",
+    "knob-right": "0x0001",
+    "key9": "0x006C",
+    "key10": "0x006D",
+    "key11": "0x006E",
+    "key12": "0x006F",
+    "knob-big": "0x0001",
+    "key13": "0x0070",
+    "key14": "0x0071",
+    "key15": "0x0072",
+    "key16": "0x0073",
+    "r3c4": "0x0000"
+   },
+   "turns": {
+    "enc0 ccw": "0x0001",
+    "enc0 cw": "0x0001",
+    "enc1 ccw": "0x0001",
+    "enc1 cw": "0x0001",
+    "enc2 ccw": "0x0001",
+    "enc2 cw": "0x0001"
+   }
+  },
+  {
+   "keys": {
+    "key1": "0x0268",
+    "key2": "0x0269",
+    "key3": "0x026A",
+    "key4": "0x026B",
+    "knob-left": "0x0001",
+    "key5": "0x0068",
+    "key6": "0x0069",
+    "key7": "0x006A",
+    "key8": "0x006B",
+    "knob-right": "0x0001",
+    "key9": "0x006C",
+    "key10": "0x006D",
+    "key11": "0x006E",
+    "key12": "0x006F",
+    "knob-big": "0x0001",
+    "key13": "0x0070",
+    "key14": "0x0071",
+    "key15": "0x0072",
+    "key16": "0x0073",
+    "r3c4": "0x0000"
+   },
+   "turns": {
+    "enc0 ccw": "0x0001",
+    "enc0 cw": "0x0001",
+    "enc1 ccw": "0x0001",
+    "enc1 cw": "0x0001",
+    "enc2 ccw": "0x0001",
+    "enc2 cw": "0x0001"
+   }
+  },
+  {
+   "keys": {
+    "key1": "0x0268",
+    "key2": "0x0269",
+    "key3": "0x026A",
+    "key4": "0x026B",
+    "knob-left": "0x0001",
+    "key5": "0x0068",
+    "key6": "0x0069",
+    "key7": "0x006A",
+    "key8": "0x006B",
+    "knob-right": "0x0001",
+    "key9": "0x006C",
+    "key10": "0x006D",
+    "key11": "0x006E",
+    "key12": "0x006F",
+    "knob-big": "0x0001",
+    "key13": "0x0070",
+    "key14": "0x0071",
+    "key15": "0x0072",
+    "key16": "0x0073",
+    "r3c4": "0x0000"
+   },
+   "turns": {
+    "enc0 ccw": "0x0001",
+    "enc0 cw": "0x0001",
+    "enc1 ccw": "0x0001",
+    "enc1 cw": "0x0001",
+    "enc2 ccw": "0x0001",
+    "enc2 cw": "0x0001"
+   }
+  },
+  {
+   "keys": {
+    "key1": "0x0268",
+    "key2": "0x0269",
+    "key3": "0x026A",
+    "key4": "0x026B",
+    "knob-left": "0x0001",
+    "key5": "0x0068",
+    "key6": "0x0069",
+    "key7": "0x006A",
+    "key8": "0x006B",
+    "knob-right": "0x0001",
+    "key9": "0x006C",
+    "key10": "0x006D",
+    "key11": "0x006E",
+    "key12": "0x006F",
+    "knob-big": "0x0001",
+    "key13": "0x0070",
+    "key14": "0x0071",
+    "key15": "0x0072",
+    "key16": "0x0073",
+    "r3c4": "0x0000"
+   },
+   "turns": {
+    "enc0 ccw": "0x0001",
+    "enc0 cw": "0x0001",
+    "enc1 ccw": "0x0001",
+    "enc1 cw": "0x0001",
+    "enc2 ccw": "0x0001",
+    "enc2 cw": "0x0001"
+   }
+  }
+ ],
+ "macros": ""
+}
