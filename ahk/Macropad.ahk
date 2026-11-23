@@ -2,7 +2,7 @@
 #SingleInstance Force
 
 ; ============================================================
-;  DOIO KB16 macro pad - pairs with the custom "rahul" firmware
+;  DOIO KB16 macro pad - pairs with the custom "enhanced" QMK keymap
 ;
 ;  The pad tells us its layer by tapping Ctrl+Alt+Shift+F13 (layer 1)
 ;  through Ctrl+Alt+Shift+F20 (layer 8) whenever the layer changes.

@@ -9,7 +9,7 @@ Ideas from planning with Rahul, grouped by what they need. Each one notes the ca
 - **Jump straight to a layer:** hold the layer knob and press key 1–8.
 - **Knob labels on the OLED.**
 
-For how each one works, see `CLAUDE.md`.
+For how each one works, see `README.md`.
 
 ## AutoHotkey only
 

@@ -42,7 +42,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KC_F17,  KC_F18,  KC_F19,  KC_DEL,  KC_MUTE,   // big knob press: mute on every layer
         KC_HOME, KC_PGUP, KC_PGDN, KC_END
     ),
-    // Layers 2-8: F9..F24. Knob presses fall through (_______) to layer 1.
+    // Layers 2-8: Shift+F13..F16, then F13..F24. Knob presses fall through (_______) to layer 1.
     [1] = FKEY_LAYER,
     [2] = FKEY_LAYER,
     [3] = FKEY_LAYER,
