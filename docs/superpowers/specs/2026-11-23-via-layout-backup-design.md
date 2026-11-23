@@ -52,8 +52,7 @@ Every new build wipes VIA's saved layout. The keymap, knob turns and macros rese
 1. **Before rebooting the pad:** read the full layout into `via/layout.json`. If the read fails, stop without flashing. `--skip-layout` overrides this.
 2. **Flash** as today.
 3. **After `OK: pad is running build ...`:**
-   - **Same build ID as before:** VIA's storage wasn't wiped, so do nothing.
-   - **Otherwise:** read the pad, which is now exactly the new defaults, and keep that in memory.
+   - **Reset the keymap** to the build's defaults (VIA `0x06`, which covers keys and knob turns), then read the pad, which is now exactly the new defaults. *(Changed while planning: QMK only wipes VIA's storage when the build **day** changes, so neither "same build ID" nor "the pad was wiped" can be assumed. Always resetting makes every case go through the merge, which is a no-op for a reflash of the same build.)*
    - **Merge** (step 4), write the result to the pad, and read it back to verify.
    - Save the new defaults to `via/defaults.json`.
 4. **Merge rules,** per slot (one key, one knob direction):

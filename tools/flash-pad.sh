@@ -3,6 +3,7 @@
 #
 #   tools/flash-pad.sh           flash doio_kb16_rev2_enhanced.bin (must be committed)
 #   tools/flash-pad.sh --check   report what's connected and which build is running; flashes nothing
+#   tools/flash-pad.sh --skip-layout   flash without saving and restoring the VIA layout
 #
 # How it works: the firmware answers a raw HID command with its build ID and
 # reboots into the bootloader on request (see "Flash tools" in keymap.c). The
@@ -12,7 +13,11 @@
 # Both live in KB16_WIN_TOOLS (default /mnt/c/Tools/kb16-flash). If the
 # bootloader then sits waiting to start the new build, the script restarts its
 # USB device with Windows' pnputil, which shows one UAC prompt.
-# Exit code 0 means the pad is running exactly the build in the .bin.
+#
+# Around the flash, tools/via-layout.py saves the VIA layout to via/layout.json
+# and afterwards puts the user's edits back on top of the new build's defaults.
+# Exit code 0 means the pad is running exactly the build in the .bin, with the
+# layout restored.
 
 set -euo pipefail
 
@@ -22,6 +27,7 @@ WIN_TOOLS="${KB16_WIN_TOOLS:-/mnt/c/Tools/kb16-flash}"
 HID="${KB16_HID_TOOL:-$WIN_TOOLS/hidapitester.exe}"
 DFU="${KB16_DFU_TOOL:-$WIN_TOOLS/dfu-util.exe}"
 PNPUTIL="/mnt/c/Windows/System32/pnputil.exe"
+VIA_LAYOUT="$ROOT/tools/via-layout.py"
 
 PAD_FILTER=(--vidpid D010/1601 --usagePage 0xFF60 --usage 0x61)
 DFU_ID="1EAF:0003"
@@ -157,6 +163,8 @@ if [[ "${1:-}" == "--check" ]]; then
 fi
 
 # ---------------------------------------------------------------- flash
+SKIP_LAYOUT=0
+[[ "${1:-}" == "--skip-layout" ]] && SKIP_LAYOUT=1
 need_tools
 [[ -f "$BIN" ]] || { say "No $(basename "$BIN"). Build first."; exit 2; }
 
@@ -183,8 +191,20 @@ trap 'rm -f "$DFU_LOG"' EXIT
 # Work out the pad's state before anything grabs the USB device.
 if in_bootloader; then
     say "Pad is already in the bootloader."
+    if (( ! SKIP_LAYOUT )); then
+        say "Its VIA layout can't be read from there. After the flash, the last backup is used:"
+        say "  via/layout.json, from build $(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["build"])' "$ROOT/via/layout.json" 2>/dev/null || echo 'none')"
+    fi
     timeout 60 "$DFU" "${DFU_ARGS[@]}" >"$DFU_LOG" 2>&1 || true   # a stuck bootloader can make it hang
 elif pad_present; then
+    if (( ! SKIP_LAYOUT )); then
+        python3 "$VIA_LAYOUT" backup || {
+            say "Not flashing: the VIA layout couldn't be saved, and flashing would wipe it."
+            say "To flash anyway and lose it, rerun with --skip-layout."
+            exit 2
+        }
+    fi
+
     # The bootloader may only wait briefly after a reset, so when dfu-util
     # supports --wait, start it first and let it catch the device the moment
     # it appears. Otherwise poll for the bootloader, then flash.
@@ -228,3 +248,12 @@ elif (( state == 2 )); then
 fi
 
 say "OK: pad is running build $EXPECTED (commit $COMMIT)."
+
+if (( ! SKIP_LAYOUT )); then
+    python3 "$VIA_LAYOUT" restore || {
+        say "The flash worked, but the VIA layout wasn't restored. The backup is in via/layout.json;"
+        say "run tools/via-layout.py restore to try again."
+        exit 3
+    }
+    say "Commit via/ so the layout and this build's defaults are recorded."
+fi

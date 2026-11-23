@@ -78,7 +78,20 @@ The screen shows `LAYER N`. Turning or pressing a knob shows what it did (`VOL +
 
 The firmware works with [VIA](https://usevia.app/) for remapping. The layer knob shows up in VIA as `0x7E40`.
 
-Every reflash wipes VIA's saved layout and macros. The defaults live in `keymap.c`, so anything worth keeping across flashes belongs there.
+A new build resets VIA's saved layout and macros to the defaults in `keymap.c`. `tools/flash-pad.sh` works around that:
+
+- **Before flashing,** it saves the layout to `via/layout.json`.
+- **After flashing,** it puts your VIA edits back on top of the new build's defaults. Keys you never changed get the new defaults, so new features still arrive.
+- **If a new build changes a key you edited,** your edit wins, and the script says which new default you didn't get.
+- **The first flash** has no record of the old defaults to compare against, so it restores nothing. It lists what differs instead.
+
+`tools/via-layout.py` does the work and can run on its own:
+
+- `diff` shows your edits.
+- `restore` reapplies them.
+- `apply "L3 key6"` puts back one key from the backup.
+
+Flashing with QMK Toolbox skips all of this.
 
 ## The script
 

@@ -47,8 +47,8 @@ Every firmware change goes through these steps, in order. Each step is done when
 1. **Edit** files under `keyboards/doio/kb16/keymaps/enhanced/`.
 2. **Build** with `qmk compile -kb doio/kb16/rev2 -km enhanced`. It shows full compiler output, while `qmk userspace-compile` prints only a summary. Done when it finishes with zero compiler warnings and a fresh `doio_kb16_rev2_enhanced.bin` is at the repo root.
 3. **Commit** the source and the `.bin` together. The message says what changed, what Rahul should check on the pad, and the QMK commit it was built against. If the change alters anything `README.md` describes, update it in the same commit. AutoHotkey changes get committed too, with the same README rule.
-4. **Flash** with `tools/flash-pad.sh`. It refuses uncommitted changes, so whatever is on the pad always matches a commit. Done when it exits 0 and prints `OK: pad is running build ...`, which means the pad reported the same build ID that's inside the `.bin`. If it fails, relay its recovery steps to Rahul; they need his hands on the pad.
-5. **Hand off for testing.** Tell Rahul the new build is on the pad. Remind him that flashing wiped his VIA layout, and give him the checklist from the commit message.
+4. **Flash** with `tools/flash-pad.sh`. It refuses uncommitted changes, so whatever is on the pad always matches a commit. Done when it exits 0 and prints `OK: pad is running build ...`, which means the pad reported the same build ID that's inside the `.bin`, and the VIA layout restore reported no error. Then commit `via/` (the layout backup and the new build's defaults). Relay any `CONFLICT` or `DROPPED` lines to Rahul. If it fails, relay its recovery steps to Rahul; they need his hands on the pad.
+5. **Hand off for testing.** Tell Rahul the new build is on the pad, and give him the checklist from the commit message.
 6. **Tag a known-good build:** once Rahul confirms the firmware works on the pad, tag that commit `fw-vN`. The last build before automatic flashing was v4, so the first flashed this way is `fw-v5`. To roll back, run `git checkout fw-vN -- doio_kb16_rev2_enhanced.bin`, commit that, and flash.
 
 ## Flashing
@@ -57,7 +57,13 @@ Every firmware change goes through these steps, in order. Each step is done when
 - **The UAC prompt:** after the download, the stm32duino bootloader waits for a USB reset that `dfu-util -R` can't send on Windows. The script then restarts the device with `pnputil /restart-device`, which needs admin, so a UAC prompt appears on Rahul's screen. Tell him to expect it before you flash. If it's declined, he replugs the pad with no key held.
 - **`tools/flash-pad.sh --check`** reports what's connected and which build the pad is running, without flashing. Use it to find out what's on the pad.
 - **Manual fallback:** hold the top-left key while plugging the pad in (bootmagic), then rerun the script, which notices a pad already in the bootloader. QMK Toolbox also still works. This is the only route for a build that crashes before it can answer raw HID.
-- **Every new build wipes VIA's saved layout**, because QMK resets VIA's storage when the build date changes. `keymap.c` is the source of truth for defaults: anything Rahul should keep across flashes belongs in `keymap.c`, not just in VIA. VIA macros are wiped too, so use plain key combos (`C(A(KC_EQL))`) instead of VIA macros.
+- **VIA layout across flashes:**
+  - **What QMK does:** QMK resets VIA's storage when the build **day** changes. The check ignores the time, so a same-day rebuild would keep the old layout and never load new `keymap.c` defaults.
+  - **What `flash-pad.sh` does about it:** `tools/via-layout.py` backs the layout up first. Afterwards it always resets the keymap to the build's defaults (VIA command `0x06`), then reapplies Rahul's edits: the slots where the backup differs from `via/defaults.json`, the old build's defaults.
+  - **Edits win over new defaults.** `CONFLICT` lines report that.
+  - **No usable record** (the first flash, or after QMK Toolbox): nothing is restored, and the differences are listed.
+  - **Keep the merge rules in `tools/via_merge.py`,** pure and tested (`python3 -m unittest` in `tools/`). A future editor app reuses them; see the design in `docs/superpowers/specs/`.
+  - **Defaults still belong in `keymap.c`.** It's what other builds and the README describe. Still use plain key combos (`C(A(KC_EQL))`) over VIA macros.
 - **Testing:** the script proves the right build is running. Whether it behaves right still needs Rahul's hands and eyes, so a firmware change is done at step 5 of the change loop. For AutoHotkey, ask Rahul to run it, or use `AutoHotkey64.exe /Validate` for a syntax check if it's available.
 
 ## Firmware decisions and gotchas

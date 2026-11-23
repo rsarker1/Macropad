@@ -6,7 +6,7 @@ Ideas from planning with Rahul. Each notes the catch that came up in discussion.
 
 **Backburner rule (Rahul, 2026-11-23):** anything that needs raw HID in both directions waits until a working version of the companion app is live. That means the AutoHotkey script talking raw HID, or the pad sending messages on its own. Request-and-reply from a PC tool through `hidapitester.exe` already works (`hid_cmd` in `tools/flash-pad.sh`, proven on every flash), so ideas that only need that stay active.
 
-**Top three overall:** VIA layout backup, per-app actions, knob-held shift layer.
+**Top two overall:** per-app actions, knob-held shift layer.
 
 ## Already built
 
@@ -16,6 +16,7 @@ Ideas from planning with Rahul. Each notes the catch that came up in discussion.
 - **Knob labels on the OLED.**
 - **Automatic flashing** with build-ID verification (`tools/flash-pad.sh`; one UAC click, no replug).
 - **Exact-timing LED driver** (`ws2812_custom.c`), which fixed random colors during fades.
+- **VIA edits survive flashing** (`tools/via-layout.py`, run by `flash-pad.sh`). Design: `docs/superpowers/specs/2026-11-23-via-layout-backup-design.md`.
 
 For how each one works, see `README.md` and `CLAUDE.md`.
 
@@ -63,13 +64,10 @@ For how each one works, see `README.md` and `CLAUDE.md`.
 
 ## Firmware plus PC tooling (request-and-reply, works today)
 
-1. **Keep the VIA layout across flashes.**
-   - **What:** `flash-pad.sh` reads the layout, knob turns and macros through VIA's own protocol before flashing, and writes them back after. No firmware change.
-   - **Catch:** writing an old layout back would silently undo new defaults in `keymap.c`. It needs a rule, such as restoring only when asked, or only when the layout's shape is unchanged.
-2. **Claude Code status light.**
+1. **Claude Code status light.**
    - **What:** a new `F0 03` subcommand sets one key's LED color. Claude Code hooks call `hidapitester.exe` to light it while Claude waits for input, and clear it when done. It's the first slice of the agent approval pad.
    - **Catch:** the per-layer lighting redraws every LED on each layer change, so the status key needs to be drawn on top (in `rgb_matrix_indicators_user`) to survive.
-3. **Key usage counts, then a layout that learns.**
+2. **Key usage counts, then a layout that learns.**
    - **What:** the firmware counts presses per key and layer and saves them on the pad; a tool reads them. Later, combine them with the script's action history to suggest moves ("key 14 gets 40 presses a day, move it to key 2").
    - **Catch:** saving counts writes to flash-emulated EEPROM, which wears out, so batch the writes (for example, once every few minutes).
 
@@ -135,6 +133,6 @@ Rahul also plans a public visual QMK editor ("like Vial but better"). What build
   - **Rejected:** a scheduled task that runs as admin with no prompt. It's convenient on Rahul's PC, but a standing elevated task is a security liability to ship to users.
   - **Unverified:** on Linux and macOS, libusb can probably send a real reset without admin.
 - **The firmware side carries over as is:** the build-ID query (`F0 01`), reboot-to-bootloader (`F0 02 'BOOT'`), and checking the build ID after flashing to prove the flash took.
-- **VIA's layout survives a reflash only when the build date is the same.** Any new build wipes it. An editor that flashes should back up the layout before flashing and restore it after.
+- **VIA's layout survives a reflash only when the build day is the same** (QMK's check ignores the time), and then new defaults silently don't load. An editor that flashes should back up, reset to the new defaults, and reapply the user's edits. The merge rules and what doesn't carry over are in `docs/superpowers/specs/2026-11-23-via-layout-backup-design.md`.
 - **Pipe gotcha in shell tooling:** `cmd | grep -q` under `pipefail` gives false "not found" (the left side dies of SIGPIPE). Relevant if the app shells out to tools.
 - **Module or fork:** prefer QMK community modules over forking QMK (Vial maintains a fork). Catch: modules have no raw HID or VIA command hook, so custom `0xF0` commands can't be a clean module today. Asking QMK for that hook may avoid a fork.
