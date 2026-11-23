@@ -73,6 +73,19 @@ Rahul is considering a bigger project to replace AutoHotkey with a companion app
   - structured logs
 - **Build order:** start with a thin slice (raw HID, OLED request display, one hook script) and grow it into the full app. Don't build all the plumbing first.
 
+### Lessons for a public QMK editor app (from `tools/flash-pad.sh`, 2026-11-23)
+
+Rahul also plans a public visual QMK editor ("like Vial but better"). What building automatic flashing for this pad taught:
+
+- **Flashing is one code path per bootloader.** This pad's stm32duino bootloader waits for a USB reset after a download; STM32's built-in DFU bootloader can be told to start the firmware itself; RP2040 reboots on its own after a UF2 copy. Vial leaves flashing to QMK Toolbox, so in-app flashing is a differentiator but also the costliest feature. Consider leaving it out of the first version.
+- **Windows can't send the stm32duino reset without admin.** `dfu-util -R` doesn't do a real USB reset under WinUSB. Restarting the device (`pnputil /restart-device`) works, but needs admin.
+  - **App pattern:** try the normal way; if the board is still in the bootloader, ask for elevation once, only then; if declined, ask the user to unplug and replug (no key held).
+  - **Rejected:** a scheduled task that runs as admin with no prompt. It's convenient on Rahul's PC, but a standing elevated task is a security liability to ship to users.
+  - **Unverified:** on Linux and macOS, libusb can probably send a real reset without admin.
+- **The firmware side carries over as is:** the build-ID query (`F0 01`), reboot-to-bootloader (`F0 02 'BOOT'`), and checking the build ID after flashing to prove the flash took.
+- **VIA's layout survives a reflash only when the build date is the same.** Any new build wipes it. An editor that flashes should back up the layout before flashing and restore it after.
+- **Pipe gotcha in shell tooling:** `cmd | grep -q` under `pipefail` gives false "not found" (the left side dies of SIGPIPE). Relevant if the app shells out to tools.
+
 ## Bigger ideas (brainstorm, not planned)
 
 - **Context-generated keys:** an LLM picks 16 actions for the current app. It must choose from a fixed list of approved actions and never write commands that run.
