@@ -32,15 +32,15 @@ For how each one works, see `CLAUDE.md`.
 
 ## Needs raw HID (deferred)
 
-Raw HID is a two-way data channel over USB that VIA already uses. Custom commands can share it as long as they don't take VIA's command IDs, for example through `via_command_kb`.
+Raw HID is a two-way data channel over USB that VIA already uses. The firmware already has a custom command channel on it (`0xF0`, used by the flash tools; see `CLAUDE.md`), and new features become subcommands there. Request-and-reply from WSL through `hidapitester.exe` is built (`hid_cmd` in `tools/flash-pad.sh`); its first real-hardware run is Rahul's first automatic flash. What doesn't exist yet is the pad sending messages on its own, unprompted.
 
 - **Pad → PC:**
   - **What:** the pad could report knob events like "knob 3 turned right, sent Ctrl+Z" while still sending the real key, so the knobs keep working without the script.
   - **Status:** Rahul chose OLED labels instead, for now.
-  - **Unverified:** that the script can read these messages through Windows Raw Input (`WM_INPUT`, usage page `0xFF60`, usage `0x61`). Test that before building on it.
+  - **Unverified:** whether AutoHotkey can receive these messages through Windows Raw Input (`WM_INPUT`, usage page `0xFF60`, usage `0x61`). Test that before building on it.
 - **PC → pad:**
   - **What:** the script could tell the pad to change layer, or send text for the OLED.
-  - **Catch:** writing from the script likely needs `hidapi.dll` through `DllCall`.
+  - **Catch:** sending these from AutoHotkey likely needs `hidapi.dll` through `DllCall`, or calling `hidapitester.exe` as the flash tools do.
 - **What raw HID would unlock:**
   - **A 4×4 grid of key labels on the OLED.** Each label can be 5 characters, since 21 ÷ 4 leaves room for 5. The script would send them from its `Actions` table.
   - **Replace the announce combos with real messages,** so no hidden keystrokes can leak into apps.

@@ -6,6 +6,8 @@
 // so the PC and the pad can't drift apart.
 
 #include QMK_KEYBOARD_H
+#include "raw_hid.h"
+#include "version.h"
 
 #define NUM_LAYERS DYNAMIC_KEYMAP_LAYER_COUNT
 
@@ -257,7 +259,10 @@ layer_state_t layer_state_set_user(layer_state_t state) {
     return state;
 }
 
+static void flash_tools_task(void);
+
 void housekeeping_task_user(void) {
+    flash_tools_task();
     if (knob_label_active && timer_elapsed(knob_label_timer) > KNOB_LABEL_MS) {
         knob_label_active = false;
         oled_dirty        = true;
@@ -343,6 +348,63 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         show_knob_label(keycode);
     }
     return true;
+}
+
+// ---------- Flash tools: build ID + reboot to bootloader over raw HID ----------
+// Used by tools/flash-pad.sh so firmware can be flashed without touching the
+// pad. Rides on VIA's raw HID channel (usage page 0xFF60, usage 0x61) with a
+// command byte VIA doesn't use. Every report is 32 bytes.
+//
+//   F0 01                 -> F0 01 <build date, ASCII, NUL-terminated>
+//   F0 02 'B' 'O' 'O' 'T'  -> F0 02 01, then reboots into the bootloader
+//                            (F0 02 00 if the magic bytes are wrong)
+//   F0 <anything else>    -> F0 FF
+//
+// The build date is unique per build (to the second), so the script compares
+// it with the KB16ID string inside the .bin to confirm the flash took.
+
+#define FLASH_CMD       0xF0
+#define FLASH_GET_ID    0x01
+#define FLASH_BOOTLOAD  0x02
+
+// The "KB16ID:" prefix lets the script find this string inside the .bin.
+static const char build_id[] = "KB16ID:" QMK_BUILDDATE;
+
+static bool     reboot_pending;
+static uint16_t reboot_timer;
+
+bool via_command_kb(uint8_t *data, uint8_t length) {
+    if (data[0] != FLASH_CMD) return false;  // everything else is VIA's
+
+    uint8_t sub   = data[1];
+    bool    magic = length >= 6 && data[2] == 'B' && data[3] == 'O' && data[4] == 'O' && data[5] == 'T';
+    for (uint8_t i = 2; i < length; i++) data[i] = 0;
+
+    if (sub == FLASH_GET_ID) {
+        const char *id = build_id + 7;  // skip "KB16ID:"
+        for (uint8_t i = 0; id[i] && i + 3 < length; i++) data[i + 2] = id[i];  // keeps a NUL at the end
+    } else if (sub == FLASH_BOOTLOAD) {
+        data[2] = magic ? 1 : 0;
+        if (magic) {
+            reboot_pending = true;
+            reboot_timer   = timer_read();
+        }
+    } else {
+        data[1] = 0xFF;
+    }
+    raw_hid_send(data, length);
+    return true;
+}
+
+static void flash_tools_task(void) {
+    if (!reboot_pending || timer_elapsed(reboot_timer) < 100) return;  // let the reply go out first
+#ifdef OLED_ENABLE
+    oled_clear();
+    oled_set_cursor(5, 1);
+    oled_write_P(PSTR("FLASHING..."), false);
+    oled_render_dirty(true);
+#endif
+    reset_keyboard();
 }
 
 // ---------- OLED ----------

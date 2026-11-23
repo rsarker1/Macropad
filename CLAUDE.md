@@ -42,14 +42,17 @@ Every firmware change goes through these steps, in order. Each step is done when
 1. **Edit** files under `keyboards/doio/kb16/keymaps/enhanced/`.
 2. **Build** with `qmk compile -kb doio/kb16/rev2 -km enhanced`. It shows full compiler output, while `qmk userspace-compile` prints only a summary. Done when it finishes with zero compiler warnings and a fresh `doio_kb16_rev2_enhanced.bin` is at the repo root.
 3. **Commit** the source and the `.bin` together. The message says what changed and what Rahul should check on the pad. AutoHotkey changes get committed too.
-4. **Hand off.** Tell Rahul the `.bin` is ready, and give its Windows path from `wslpath -w doio_kb16_rev2_enhanced.bin` so he can open it in QMK Toolbox. Remind him that flashing wipes his VIA layout, and give him the checklist from the commit message.
-5. **Tag a known-good build:** once Rahul confirms the firmware works on the pad, tag that commit `fw-vN`. The last delivered build was v4, so the next is `fw-v5`. To roll back, run `git checkout fw-vN -- doio_kb16_rev2_enhanced.bin` and flash that file.
+4. **Flash** with `tools/flash-pad.sh`. It refuses uncommitted changes, so whatever is on the pad always matches a commit. Done when it exits 0 and prints `OK: pad is running build ...`, which means the pad reported the same build ID that's inside the `.bin`. If it fails, relay its recovery steps to Rahul; they need his hands on the pad.
+5. **Hand off for testing.** Tell Rahul the new build is on the pad. Remind him that flashing wiped his VIA layout, and give him the checklist from the commit message.
+6. **Tag a known-good build:** once Rahul confirms the firmware works on the pad, tag that commit `fw-vN`. The last build before automatic flashing was v4, so the first flashed this way is `fw-v5`. To roll back, run `git checkout fw-vN -- doio_kb16_rev2_enhanced.bin`, commit that, and flash.
 
 ## Flashing
 
-- **Flash** with QMK Toolbox. To enter bootloader mode, hold the top-left key while plugging the pad in (bootmagic), or assign keycode `0x7C00` (`QK_BOOT`) to a key in VIA and press it.
+- **`tools/flash-pad.sh`** reboots the pad into its bootloader over raw HID, flashes it with `dfu-util`, then confirms the build ID. It drives Windows programs (`hidapitester.exe`, `dfu-util.exe` in `C:\Tools\kb16-flash\`) through WSL interop. If those tools are missing, point Rahul to `docs/flashing-setup.md`.
+- **`tools/flash-pad.sh --check`** reports what's connected and which build the pad is running, without flashing. Use it to find out what's on the pad.
+- **Manual fallback:** hold the top-left key while plugging the pad in (bootmagic), then rerun the script, which notices a pad already in the bootloader. QMK Toolbox also still works. This is the only route for a build that crashes before it can answer raw HID.
 - **Every new build wipes VIA's saved layout**, because QMK resets VIA's storage when the build date changes. `keymap.c` is the source of truth for defaults: anything Rahul should keep across flashes belongs in `keymap.c`, not just in VIA. VIA macros are wiped too, so use plain key combos (`C(A(KC_EQL))`) instead of VIA macros.
-- **Testing:** Claude can't test on the pad. A firmware change is done at step 4 of the change loop. For AutoHotkey, ask Rahul to run it, or use `AutoHotkey64.exe /Validate` for a syntax check if it's available.
+- **Testing:** the script proves the right build is running. Whether it behaves right still needs Rahul's hands and eyes, so a firmware change is done at step 5 of the change loop. For AutoHotkey, ask Rahul to run it, or use `AutoHotkey64.exe /Validate` for a syntax check if it's available.
 
 ## Current firmware behavior
 
@@ -72,6 +75,12 @@ All of this is in `keymap.c`. The section headings in the file match the bullets
   - **Layer 3:** J/L, scroll, Undo/Redo
   - **Layer 4:** `[`/`]`, scroll, Zoom -/+
   - **Layers 5–8:** transparent, so they behave like layer 1
+- **Flash tools (raw HID, command byte `0xF0`):**
+  - **What it is:** the firmware's custom command channel, sitting on VIA's raw HID channel (usage page `0xFF60`, usage `0x61`).
+  - **Subcommands:**
+    - `F0 01` returns the build ID: `QMK_BUILDDATE`, unique to the second, also stored in the `.bin` behind a `KB16ID:` marker.
+    - `F0 02 'B' 'O' 'O' 'T'` reboots into the bootloader. The reboot happens 100 ms later, so the reply gets out first.
+  - **Adding a raw HID feature:** add a subcommand under `0xF0` in `via_command_kb` instead of taking another command byte, and keep the two existing subcommands working. `hid_cmd` in `tools/flash-pad.sh` shows how to talk to the pad from WSL.
 - **Announce combo:** `layer_state_set_user` only sets a flag. `housekeeping_task_user` sends the combo, because sending keys from inside a layer change can fire in the middle of a key press. It also announces once, 1 s after boot.
 - **Per-layer lighting (`layer_lights[]`):** a color plus an effect per layer. Brightness is left alone so VIA's slider still works, but VIA's color and effect are overwritten on each layer change.
   - **Layers 1–4:** 1 warm white solid, 2 coral breathing, 3 amber band sweep (`BAND_VAL`), 4 green white-band sweep (`BAND_SAT`)
