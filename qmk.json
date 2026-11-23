@@ -1,0 +1,6 @@
+{
+    "userspace_version": "1.0",
+    "build_targets": [
+        ["doio/kb16/rev2", "enhanced"]
+    ]
+}
