@@ -54,6 +54,7 @@ Every firmware change goes through these steps, in order. Each step is done when
 ## Flashing
 
 - **`tools/flash-pad.sh`** reboots the pad into its bootloader over raw HID, flashes it with `dfu-util`, then confirms the build ID. It drives Windows programs (`hidapitester.exe`, `dfu-util.exe` in `C:\Tools\kb16-flash\`) through WSL interop. If those tools are missing, point Rahul to `docs/flashing-setup.md`.
+- **The UAC prompt:** after the download, the stm32duino bootloader waits for a USB reset that `dfu-util -R` can't send on Windows. The script then restarts the device with `pnputil /restart-device`, which needs admin, so a UAC prompt appears on Rahul's screen. Tell him to expect it before you flash. If it's declined, he replugs the pad with no key held.
 - **`tools/flash-pad.sh --check`** reports what's connected and which build the pad is running, without flashing. Use it to find out what's on the pad.
 - **Manual fallback:** hold the top-left key while plugging the pad in (bootmagic), then rerun the script, which notices a pad already in the bootloader. QMK Toolbox also still works. This is the only route for a build that crashes before it can answer raw HID.
 - **Every new build wipes VIA's saved layout**, because QMK resets VIA's storage when the build date changes. `keymap.c` is the source of truth for defaults: anything Rahul should keep across flashes belongs in `keymap.c`, not just in VIA. VIA macros are wiped too, so use plain key combos (`C(A(KC_EQL))`) instead of VIA macros.

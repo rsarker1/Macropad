@@ -31,4 +31,8 @@ tools/flash-pad.sh --check
 
 `Pad:` should say `connected, running <date>`, with the same date as `Repo .bin:`. From now on, `tools/flash-pad.sh` handles everything.
 
-If anything fails, the script prints how to recover by hand: hold the top-left key while plugging in, then rerun the script. It notices when the pad is already in the bootloader.
+## What to expect when flashing
+
+After the download, the pad's bootloader waits for a USB reset before it starts the new build, and `dfu-util` can't send one on Windows. The script then restarts the pad's USB device through Windows, which needs admin rights: **a UAC prompt appears, and clicking Yes is the only hands-on step.** If you decline it or don't answer within 2 minutes, the script asks you to unplug and replug the pad (no key held).
+
+If anything else fails, the script prints how to recover by hand: hold the top-left key while plugging in, then rerun the script. It notices when the pad is already in the bootloader.
